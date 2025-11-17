@@ -1,32 +1,42 @@
 import express from "express";
+import cors from "cors";
 import OpenAI from "openai";
 
 const app = express();
-const port = process.env.PORT || 3000;
+app.use(cors());
+app.use(express.json());
 
+// Load OpenAI key from Render Environment Variables
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY
 });
 
+// === TEST ROUTE ===
 app.get("/", (req, res) => {
-  res.send("LearnCore Backend Running ⚡");
+  res.json({ status: "LearnCore Backend is LIVE" });
 });
 
-app.get("/ask", async (req, res) => {
+// === REAL CHAT ROUTE ===
+app.post("/ask", async (req, res) => {
   try {
-    const completion = await client.responses.create({
-      model: "gpt-4o-mini",
-      input: "Hello backend!",
+    const userMessage = req.body.message || "Hello";
+
+    const completion = await client.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [{ role: "user", content: userMessage }]
     });
 
-    res.json({
-      success: true,
-      reply: completion.output[0].content[0].text,
-    });
+    const reply = completion.choices[0].message.content;
+    res.json({ success: true, reply });
 
   } catch (error) {
-    res.json({ error: error.message });
+    console.error("❌ OPENAI ERROR:", error);
+    res.json({ success: false, error: error.message });
   }
 });
 
-app.listen(port, () => console.log(`🚀 Server running on ${port}`));
+// === START SERVER ===
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
