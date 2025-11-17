@@ -18,7 +18,20 @@ app.get("/test-openai", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+app.get("/ask", async (req, res) => {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [{ role: "user", content: "Hello backend!" }]
+    });
+
+    res.json(completion.choices[0].message);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server running on port", process.env.PORT || 3000)
 );
+
