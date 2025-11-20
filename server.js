@@ -6,19 +6,19 @@ import OpenAI from "openai";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// 🔹 Central place for all model names
+// 🔹 All model names in one place
 const MODELS = {
-  tutor: "gpt-4o-mini",
-  feedback: "gpt-4o-mini",
-  speakingTranscribe: "whisper-1", // for future speaking features
+  tutor: "gpt-4o-mini",        // main brain for tutor / feedback
+  speakingTranscribe: "whisper-1" // for future speaking features
 };
 
 // OpenAI client – uses your key from Render env vars
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 // Health check route
@@ -37,7 +37,7 @@ app.get("/test-openai", async (req, res) => {
   }
 });
 
-// Simple AI tutor reply – uses MODELS.tutor
+// 🔸 Main AI route – use your own text
 app.post("/ask", async (req, res) => {
   try {
     const userMessage = req.body.message || "Hello from LearnCore user";
@@ -46,17 +46,7 @@ app.post("/ask", async (req, res) => {
       model: MODELS.tutor,
       messages: [
         { role: "user", content: userMessage }
-      ],
-    });
-
-    const reply = completion.choices[0].message.content;
-    res.json({ success: true, reply });("/ask", async (req, res) => {
-  try {
-    const completion = await openai.chat.completions.create({
-      model: MODELS.tutor,
-      messages: [
-        { role: "user", content: "Hello from LearnCore backend!" }
-      ],
+      ]
     });
 
     const reply = completion.choices[0].message.content;
@@ -67,7 +57,7 @@ app.post("/ask", async (req, res) => {
   }
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
