@@ -38,7 +38,19 @@ app.get("/test-openai", async (req, res) => {
 });
 
 // Simple AI tutor reply – uses MODELS.tutor
-app.get("/ask", async (req, res) => {
+app.post("/ask", async (req, res) => {
+  try {
+    const userMessage = req.body.message || "Hello from LearnCore user";
+
+    const completion = await openai.chat.completions.create({
+      model: MODELS.tutor,
+      messages: [
+        { role: "user", content: userMessage }
+      ],
+    });
+
+    const reply = completion.choices[0].message.content;
+    res.json({ success: true, reply });("/ask", async (req, res) => {
   try {
     const completion = await openai.chat.completions.create({
       model: MODELS.tutor,
@@ -58,3 +70,4 @@ app.get("/ask", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
