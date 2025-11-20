@@ -6,21 +6,27 @@ import OpenAI from "openai";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// OpenAI client (uses your OPENAI_API_KEY from Render env vars)
+// 🔹 Central place for all model names
+const MODELS = {
+  tutor: "gpt-4o-mini",
+  feedback: "gpt-4o-mini",
+  speakingTranscribe: "whisper-1", // for future speaking features
+};
+
+// OpenAI client – uses your key from Render env vars
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Root route – health check
+// Health check route
 app.get("/", (req, res) => {
   res.json({ status: "LearnCore Backend is LIVE" });
 });
 
-// Test OpenAI connection – lists model IDs
+// Test OpenAI connection – shows list of models
 app.get("/test-openai", async (req, res) => {
   try {
     const models = await openai.models.list();
@@ -31,11 +37,11 @@ app.get("/test-openai", async (req, res) => {
   }
 });
 
-// Simple AI reply – GET /ask
+// Simple AI tutor reply – uses MODELS.tutor
 app.get("/ask", async (req, res) => {
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-mini", // or "gpt-4o-mini" if you prefer
+      model: MODELS.tutor,
       messages: [
         { role: "user", content: "Hello from LearnCore backend!" }
       ],
@@ -49,7 +55,6 @@ app.get("/ask", async (req, res) => {
   }
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
