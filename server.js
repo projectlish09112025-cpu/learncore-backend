@@ -6,13 +6,13 @@ import OpenAI from "openai";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
+// Middleware
 app.use(cors());
 app.use(express.json());
 
 // 🔹 All model names in one place
 const MODELS = {
-  tutor: "gpt-4o-mini",        // main brain for tutor / feedback
+  tutor: "gpt-4o-mini",          // main brain for tutor / feedback
   speakingTranscribe: "whisper-1" // for future speaking features
 };
 
@@ -21,12 +21,12 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Health check route
+// ✅ Health check route
 app.get("/", (req, res) => {
   res.json({ status: "LearnCore Backend is LIVE" });
 });
 
-// Test OpenAI connection – shows list of models
+// ✅ Test OpenAI connection – shows list of models
 app.get("/test-openai", async (req, res) => {
   try {
     const models = await openai.models.list();
@@ -37,10 +37,13 @@ app.get("/test-openai", async (req, res) => {
   }
 });
 
-// 🔸 Main AI route – use your own text
-app.post("/ask", async (req, res) => {
+// ✅ Simple AI route using URL ?q=...
+// Example:
+// https://YOUR-APP.onrender.com/ask?q=Give feedback on this PTE essay...
+app.get("/ask", async (req, res) => {
   try {
-    const userMessage = req.body.message || "Hello from LearnCore user";
+    const userMessage =
+      req.query.q || "Please give general PTE study advice.";
 
     const completion = await openai.chat.completions.create({
       model: MODELS.tutor,
@@ -57,7 +60,7 @@ app.post("/ask", async (req, res) => {
   }
 });
 
-// Start server
+// 🔚 Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
